@@ -1,0 +1,64 @@
+package io.bus.syncer;
+
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class App {
+
+	public static void main(String[] args){
+
+		int totalStations = 6;
+		int maxPassenger = 50;
+		Bus bus = new Bus(maxPassenger);
+		boolean continueProcess = true;
+		
+		int fixedThreadPool = 7;
+		
+		ExecutorService executor = Executors.newFixedThreadPool(fixedThreadPool);
+		
+		Thread[] stations = new Thread[totalStations]; 
+
+		for (int i = 0; i < totalStations; i++) {
+			Stations s = new Stations(i+1, getRandomNumber(5000, 3000), bus, continueProcess);
+			executor.submit(s);
+			stations[i] = s;
+		}
+
+		BusStationServiceProvider serviceRunner  = new BusStationServiceProvider(stations, continueProcess);
+
+		executor.submit(serviceRunner);
+				
+		Scanner scanner = new Scanner(System.in);
+		scanner.nextLine();
+		
+		continueProcess = false;
+		
+		executor.shutdown();
+		
+		for(int i = 0; i < stations.length; i++ ){
+			Stations st = (Stations)stations[i];
+			st.shutdown();
+		}
+		serviceRunner.shutdown();
+				
+		try {
+			executor.awaitTermination(1, TimeUnit.DAYS);
+		} catch (InterruptedException e) {			
+			e.printStackTrace();
+		}
+		
+		scanner.close();
+		
+		System.out.println("Bus completed");
+		
+
+	}
+
+	private static int getRandomNumber(int upperBound, int lowerBound){
+		return	lowerBound + (int)(Math.random() * ((upperBound - lowerBound) + 1));
+	}
+}
+
+

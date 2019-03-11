@@ -1,0 +1,47 @@
+package io.bus.syncer;
+
+import java.util.Date;
+
+public class Passenger extends Thread {	
+
+	Date arrivalDateTime;
+	Date onBoardDateTime;
+	Date departureDateTime;
+	int onBoardStation;
+	int departureStation;
+	
+	public Passenger(int obSt, int dpSt){
+		onBoardStation = obSt;
+		departureStation = dpSt;
+		arrivalDateTime = new Date();
+	}
+	
+	public synchronized void setOnBoardDate(){
+		onBoardDateTime = new Date();
+	}
+	
+	public synchronized void setDepartureDate(){
+		departureDateTime = new Date();
+	}
+	
+	public synchronized int getDepartureStation(){
+		return departureStation;
+	}
+	
+	@Override
+	public synchronized String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Passenger arrived at station no: ");
+		builder.append(onBoardStation);
+		builder.append(" at ");
+		builder.append(arrivalDateTime);
+		builder.append(" and onboarded on bus at: ");
+		builder.append(onBoardDateTime);
+		builder.append(" and departure at: ");
+		builder.append(departureDateTime);
+		builder.append(" at station no: ");
+		builder.append(departureStation);		
+		return builder.toString();
+	}
+				
+}

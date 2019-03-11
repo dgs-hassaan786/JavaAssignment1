@@ -1,0 +1,92 @@
+package io.bus.syncer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Bus{
+	private Semaphore control;
+	private AtomicInteger passengerCount = new AtomicInteger(0);	
+	private int maxPassengerCapacity;
+	Map<Integer, List<Passenger>> passengers;
+	
+	public Bus(int maxPassenger){
+		control = new Semaphore(maxPassenger);		
+		this.maxPassengerCapacity = maxPassenger;
+		
+		passengers = new ConcurrentHashMap<Integer, List<Passenger>>();
+		
+		for (int i = 0; i < 6; i++) {
+			passengers.put(i, new ArrayList<Passenger>());
+		}
+	}
+	
+	/**
+	* synchronized method for onBoarding passengers on the bus
+	* @param p - Passenger Information
+	*/
+	public synchronized void onBoard(Passenger p){		
+		
+		try {
+			//Step 1: trying to acquire the semaphore lock first
+			control.acquire();
+			
+			//Step 2: updating the onBoard DateTime
+			p.setOnBoardDate();
+			
+			//Step 3: adding the passenger information in our concurrent dictionary
+			passengers.get(p.getDepartureStation()).add(p);
+			
+			//Step 4: increasing the passenger counter
+			passengerCount.incrementAndGet();
+			
+		} catch (Exception e) {
+			System.out.println("Bus - onboard method encountered exception: " + e.getMessage());
+			e.printStackTrace();
+		}			
+	}
+	
+	/**
+	* synchronized method for departing passengers from a bus
+	* @param stationNumber - Station Number
+	*/
+	public synchronized void leave(int stationNumber){			
+		
+		//Step 1: checking the station whether there are any passenger for departure
+		if(passengers.get(stationNumber).size() > 0){
+			
+			//Step 2: removing the first most passenger
+			Passenger p = passengers.get(stationNumber).remove(0);
+			
+			//Step 3: setting the departure DateTime of the passenger
+			p.setDepartureDate();
+			
+			//Step 4: Decreasing the atomic counter
+			passengerCount.decrementAndGet();
+			
+			//Step 5: Printing the information of the leaving Passenger
+			System.out.println(p.toString());
+		}
+		
+		//Releasing the semaphore lock
+		control.release();
+	}
+	
+	/**
+	* getter property for total_passenger_traveling_bus (passengerCount)
+	*/
+	public synchronized int getPassengerCount(){
+		return passengerCount.intValue();
+	}
+	
+	/**
+	* getter property for maxPassengerCapacity
+	*/
+	public synchronized int getMaxPassengerAllowed(){
+		return maxPassengerCapacity;
+	}
+			
+}

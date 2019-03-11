@@ -1,0 +1,59 @@
+package io.bus.syncer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Bus{
+	private Semaphore control;
+	private AtomicInteger num = new AtomicInteger(0);	
+	private int maxPassengerCapacity;
+	Map<Integer, List<Passenger>> passengers;
+	
+	public Bus(int maxPassenger){
+		control = new Semaphore(maxPassenger);		
+		this.maxPassengerCapacity = maxPassenger;
+		
+		passengers = new ConcurrentHashMap<Integer, List<Passenger>>();
+		
+		for (int i = 0; i < 6; i++) {
+			passengers.put(i, new ArrayList<Passenger>());
+		}
+	}
+	
+	public synchronized void onBoard(Passenger p){		
+		try {
+			control.acquire();
+			p.setOnBoardDate();
+			passengers.get(p.getDepartureStation()).add(p);
+			
+		} catch (Exception e) {
+			
+		}
+		num.incrementAndGet();
+	}
+	
+	public synchronized void leave(int station){
+		num.decrementAndGet();
+		
+		if(passengers.get(station).size() > 0){
+			Passenger p = passengers.get(station).remove(0);
+			p.setDepartureDate();
+			System.out.println(p.toString());
+		}
+		
+		control.release();
+	}
+	
+	public synchronized int getPassengerCount(){
+		return num.intValue();
+	}
+	
+	public synchronized int getMaxPassengerAllowed(){
+		return maxPassengerCapacity;
+	}
+			
+}

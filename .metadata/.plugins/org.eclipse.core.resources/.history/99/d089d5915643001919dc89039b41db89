@@ -1,0 +1,26 @@
+package io.bus.syncer;
+
+public final class SharedContext {
+	
+	
+	
+	private final int maxPassengers = 50;
+	private final int totalStations = 6;
+
+
+	public SharedContext() {
+		
+	}
+	
+	
+	public final int getTotalStations(){
+		return this.totalStations ;
+	}
+	
+	public final int getMaxPassengers(){
+		return this.maxPassengers;
+	}
+	
+	
+	
+}

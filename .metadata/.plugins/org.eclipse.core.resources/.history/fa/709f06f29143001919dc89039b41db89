@@ -1,0 +1,143 @@
+package io.bus.syncer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * It contains the definition for the information holding related the Bus. The class is a thread-safe and contains the methods like onBoard, leave.
+ */
+public class Bus{
+
+	/**
+	 * Semaphore lock
+	 */
+	private Semaphore control;
+
+	/**
+	 * Passenger Counter
+	 */
+	private AtomicInteger passengerCount = new AtomicInteger(0);
+
+	/**
+	 * Maximum Passenger Capacity which a bus can holds 
+	 */
+	private int maxPassengerCapacity;
+
+	/**
+	 * Concurrent Dictionary for holding passengers according to their departure stations 
+	 */
+	Map<Integer, List<Passenger>> passengers;
+
+
+	ReentrantLock busFunctionalityLock; 
+
+	/**
+	 * Bus constructor  
+	 * @param maxPassenger - Expecting the maximum Passenger count which a bus can handle
+	 */
+	public Bus(int maxPassenger){
+		control = new Semaphore(maxPassenger);		
+		this.maxPassengerCapacity = maxPassenger;
+
+		busFunctionalityLock = new ReentrantLock();
+
+		passengers = new ConcurrentHashMap<Integer, List<Passenger>>();
+
+		for (int i = 0; i < 6; i++) {
+			passengers.put(i, new ArrayList<Passenger>());
+		}
+	}
+
+	/**
+	 * synchronized method for onBoarding passengers on the bus
+	 * @param p - Passenger Information
+	 */
+	public synchronized void onBoard(Passenger p){		
+
+		boolean tryLock  = false;
+		try {
+			//Step 1: trying to acquire the semaphore lock first
+			control.acquire();
+
+			//Step 2: updating the onBoard DateTime
+			p.setOnBoardDate();
+
+			tryLock = busFunctionalityLock.tryLock();
+			if(tryLock){
+				System.out.println(p.getDepartureStation());
+				//Step 3: adding the passenger information in our concurrent dictionary
+				passengers.get(p.getDepartureStation()).add(p);
+
+				//Step 4: increasing the passenger counter
+				passengerCount.incrementAndGet();
+			}
+
+		} catch (Exception e) {
+			System.out.println("Bus - onboard method encountered exception: " + e.getMessage());
+			e.printStackTrace();
+		} finally{
+			if(tryLock)
+				busFunctionalityLock.unlock();
+		}			
+	}
+
+	/**
+	 * synchronized method for departing passengers from a bus
+	 * @param stationNumber - Station Number
+	 */
+	public synchronized void leave(int stationNumber){			
+		boolean tryLock  = false;
+		try{
+			//Step 1: checking the station whether there are any passenger for departure
+			if(passengers.get(stationNumber).size() > 0){
+
+				tryLock = busFunctionalityLock.tryLock();
+
+				if(tryLock){
+					//Step 2: removing the first most passenger
+					Passenger p = passengers.get(stationNumber).remove(0);
+
+					//Step 3: setting the departure DateTime of the passenger
+					p.setDepartureDate();
+
+					//Step 4: Decreasing the atomic counter
+					passengerCount.decrementAndGet();
+
+					//Step 5: Printing the information of the leaving Passenger
+					System.out.println(p.toString());
+				}
+			}
+
+		} catch (Exception e) {
+			System.out.println("Bus - leave method encountered exception: " + e.getMessage());
+			e.printStackTrace();
+		} finally{
+			if(tryLock)
+				busFunctionalityLock.unlock();
+			//Releasing the semaphore lock
+			control.release();	
+		}
+
+
+	}
+
+	/**
+	 * getter property for total_passenger_traveling_bus (passengerCount)
+	 */
+	public synchronized int getPassengerCount(){
+		return passengerCount.intValue();
+	}
+
+	/**
+	 * getter property for maxPassengerCapacity
+	 */
+	public synchronized int getMaxPassengerAllowed(){
+		return maxPassengerCapacity;
+	}
+
+}

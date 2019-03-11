@@ -1,0 +1,82 @@
+package io.bus.syncer;
+
+/**
+* Simulator for onboarding and leaving passenger to and from station/bus.
+*/
+public class BusStationServiceProvider implements Runnable {
+
+	/**
+	* keepProcessing - boolean parameter used in the Thread.run()
+	*/
+	private boolean keepProcessing;
+	
+	/**
+	* Shared stations thread array 
+	*/
+	private Thread[] stations;
+
+	/**
+	* constructor expecting
+	* @param stations - Threads of stations running
+	* @param keepProcessing - boolean parameter used in the Thread.run()
+	*/
+	public BusStationServiceProvider(Thread[] stations, boolean keepProcessing){
+		this.stations = stations;
+		this.keepProcessing = keepProcessing;
+	}
+	
+	/**
+	* function which modify the value of the keepProcessing parameter 
+	*/
+	public void shutdown(){
+		this.keepProcessing = false;
+	}
+	
+	@Override
+	public void run() {
+		
+		//Simulating through the stations		
+		int n = 0;
+		while(keepProcessing){
+			if(n ==6 )
+				n= 0;
+			
+			System.out.println("Bus is at station: " + (n+1));
+								
+			try {
+				//Sleeping for 3500 ms at each station
+				//scenario created for bus arrival at the station
+				Thread.sleep(3500);
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+								
+			
+			Stations st = (Stations)stations[n];		
+			
+			// Random Passengers leaving from the bus
+			st.leaveFromBus(getRandomNumber(50, 0));
+			
+			// Random Passengers onBoarding on the bus
+			st.onBoardOnBus(getRandomNumber(50, 0));		
+			
+			st.printCurrentPassengerCountInTheBus();
+						
+			System.out.println("Bus Moving to next station");
+			
+			n++;
+			
+		}
+
+	}
+		
+	/**
+	* private method for generating random number
+	* @param upperBound - the upper limit (max number)
+	* @param lowerBound - the lower limit (min number)
+	*/
+	private int getRandomNumber(int upperBound, int lowerBound){
+		return	lowerBound + (int)(Math.random() * ((upperBound - lowerBound) + 1));
+	}
+}
