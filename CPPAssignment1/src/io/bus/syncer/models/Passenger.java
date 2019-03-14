@@ -1,4 +1,4 @@
-package io.bus.syncer;
+package io.bus.syncer.models;
 
 import java.util.Date;
 /**

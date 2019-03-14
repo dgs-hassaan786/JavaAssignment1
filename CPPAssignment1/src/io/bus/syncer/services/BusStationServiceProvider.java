@@ -1,4 +1,6 @@
-package io.bus.syncer;
+package io.bus.syncer.services;
+
+import io.bus.syncer.models.Stations;
 
 /**
  * Simulator for onboarding and leaving passenger to and from station/bus.
@@ -40,7 +42,7 @@ public class BusStationServiceProvider implements Runnable {
 		while(keepProcessing){
 			if(n ==6 )
 				n= 0;
-
+			System.out.println("-----------------------------");
 			System.out.println("Bus is at station: " + (n+1));
 
 			try {
@@ -64,10 +66,20 @@ public class BusStationServiceProvider implements Runnable {
 			st.printCurrentPassengerCountInTheBus();
 
 			System.out.println("Bus Moving to next station");
-
+			System.out.println("--------------------------");
 			n++;
 
 		}
+
+		System.out.println("-------------------- Summary ---------------------- ");
+
+
+		for (int i = 0; i < stations.length; i++) {
+			System.out.println("Total passengers ("+ ((Stations)stations[i]).getWaitingPassenger() +")  on the station " + (i+1));
+		}
+
+		((Stations)stations[0]).printCurrentPassengerCountInTheBus();
+		System.out.println("---------------- End of Summary ---------------------- ");
 
 	}
 

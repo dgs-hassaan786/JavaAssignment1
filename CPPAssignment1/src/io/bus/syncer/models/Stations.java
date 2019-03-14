@@ -1,7 +1,9 @@
-package io.bus.syncer;
+package io.bus.syncer.models;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import io.bus.syncer.commons.Helpers;
 
 /**
  * Class for simulating the scenario of the station.
@@ -60,9 +62,9 @@ public class Stations extends Thread {
 	 */
 	public synchronized void onBoardOnBus(int passengerCount){
 
-		System.out.println("passenger For OnBoarding: " + passengerCount);
+		//System.out.println("passenger For OnBoarding: " + passengerCount);
 
-		int i = 0;
+		int i = 0,onBoarder = 0;
 		for (i = 0; i < passengerCount; i++) {
 			//first we are checking whether we have any queued passenger at the station
 			if(passengers.size() > 0){				
@@ -79,6 +81,7 @@ public class Stations extends Thread {
 					try {
 						p = passengers.take();
 						bus.onBoard(p);
+						onBoarder++;
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -91,7 +94,7 @@ public class Stations extends Thread {
 		}
 
 		if(i > 0 ){
-			System.out.println("Total Passenger(s) "+ passengerCount + " onboarder from station " + stationNumber);
+			System.out.println("Total Passenger(s) "+ onBoarder + " onboarder from station " + stationNumber);
 		}
 
 	}
@@ -108,10 +111,15 @@ public class Stations extends Thread {
 	 * @param passengerCount - Total number of passenger to departure from the bus at the current station  
 	 */
 	public synchronized void leaveFromBus(int passengerCount){
-		int i = 0;
+		int i = 0, left = 0;
 		for (i = 0; i < passengerCount; i++) {
 			if(bus.getPassengerCount() > 0){
-				bus.leave(stationNumber - 1);				
+				if( bus.getPassengerByStation(stationNumber - 1) > 0){
+					bus.leave(stationNumber - 1);
+					left++;
+				}else{
+					break;
+				}				
 			}else{
 				System.out.println("No Passenger to departure at station: " + stationNumber);
 				break;
@@ -119,7 +127,7 @@ public class Stations extends Thread {
 		}
 
 		if(i > 0 ){
-			System.out.println("Total Passenger(s) "+ passengerCount + " left bus at station " + stationNumber);
+			System.out.println("Total Passenger(s) "+ left + " left bus at station " + stationNumber);
 		}
 
 	}
@@ -138,6 +146,18 @@ public class Stations extends Thread {
 	@Override
 	public void run() {
 
+
+		// Generating random Station except the current station
+		//We will be using it inside the random Departure Station
+		Integer[] randomStationsExceptCurrent = new Integer[5];
+		int iterator = 0;
+		for (int i = 1; i <= 6; i++) {
+			if(i == stationNumber)
+				continue;
+
+			randomStationsExceptCurrent[iterator++] = i; 					
+		}
+
 		//keep processing the loop unless the variable is not false
 		while(keepProcessing){
 
@@ -149,19 +169,10 @@ public class Stations extends Thread {
 			}
 
 			//generating the random passenger arriving at station;
-			int randomPassenger = (int)(Math.random()*45);
-
-
+			int randomPassenger = Helpers.getRandomNumber(45);				
 			for (int i = 0; i < randomPassenger; i++) {
 				//generating random stationNumber for departure other than the current one 
-				int randomDepartureStation = (int)(Math.random()*6) + 1;
-				if(randomDepartureStation == stationNumber){
-					if(randomDepartureStation == 6)
-						randomDepartureStation = 1;
-					else if(randomDepartureStation == 1) {
-						randomDepartureStation += 2;
-					}
-				}
+				int randomDepartureStation = Helpers.getRandomElementFromArray(randomStationsExceptCurrent);
 
 				//simulating the scenario of passenger waiting at the station
 				Passenger p = new Passenger(stationNumber, randomDepartureStation);
