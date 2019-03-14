@@ -1,14 +1,14 @@
-package io.bus.syncer;
+package hassaan.bus.simulator;
 
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import io.bus.syncer.commons.Helpers;
-import io.bus.syncer.models.Bus;
-import io.bus.syncer.models.Stations;
-import io.bus.syncer.services.BusStationServiceProvider;
+import hassaan.bus.simulator.commons.Helpers;
+import hassaan.bus.simulator.models.Bus;
+import hassaan.bus.simulator.models.Stations;
+import hassaan.bus.simulator.services.BusStationServiceProvider;
 
 /**
  * 

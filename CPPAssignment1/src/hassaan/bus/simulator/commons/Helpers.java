@@ -1,4 +1,4 @@
-package io.bus.syncer.commons;
+package hassaan.bus.simulator.commons;
 
 import java.util.Random;
 

@@ -1,9 +1,9 @@
-package io.bus.syncer.models;
+package hassaan.bus.simulator.models;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import io.bus.syncer.commons.Helpers;
+import hassaan.bus.simulator.commons.Helpers;
 
 /**
  * Class for simulating the scenario of the station.

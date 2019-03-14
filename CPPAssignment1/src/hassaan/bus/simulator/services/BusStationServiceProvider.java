@@ -1,6 +1,6 @@
-package io.bus.syncer.services;
+package hassaan.bus.simulator.services;
 
-import io.bus.syncer.models.Stations;
+import hassaan.bus.simulator.models.Stations;
 
 /**
  * Simulator for onboarding and leaving passenger to and from station/bus.

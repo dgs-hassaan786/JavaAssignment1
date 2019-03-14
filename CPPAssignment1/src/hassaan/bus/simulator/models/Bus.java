@@ -1,4 +1,4 @@
-package io.bus.syncer.models;
+package hassaan.bus.simulator.models;
 
 import java.util.ArrayList;
 import java.util.List;
